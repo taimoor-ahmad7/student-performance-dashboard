@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Students | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Students</h1>
+        <p class="text-muted mb-0">Browse, search, filter, and sort the imported academic records.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'students:student_compare' %}">Compare Students</a>
+        <a class="btn btn-primary" href="{% url 'students:student_create' %}">Add Student</a>
+    </div>
+</div>
+
+<form method="get" class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" for="q">Search</label>
+                <input
+                    class="form-control"
+                    type="search"
+                    id="q"
+                    name="q"
+                    value="{{ filters.q }}"
+                    placeholder="Student ID, school, subject, guardian"
+                >
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="sex">Sex</label>
+                <select class="form-select" id="sex" name="sex">
+                    <option value="">All</option>
+                    <option value="F" {% if filters.sex == 'F' %}selected{% endif %}>Female</option>
+                    <option value="M" {% if filters.sex == 'M' %}selected{% endif %}>Male</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="subject">Subject</label>
+                <select class="form-select" id="subject" name="subject">
+                    <option value="">All</option>
+                    <option value="Math" {% if filters.subject == 'Math' %}selected{% endif %}>Math</option>
+                    <option value="Portuguese" {% if filters.subject == 'Portuguese' %}selected{% endif %}>Portuguese</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="studytime">Study Time</label>
+                <select class="form-select" id="studytime" name="studytime">
+                    <option value="">All</option>
+                    <option value="1" {% if filters.studytime == '1' %}selected{% endif %}>1</option>
+                    <option value="2" {% if filters.studytime == '2' %}selected{% endif %}>2</option>
+                    <option value="3" {% if filters.studytime == '3' %}selected{% endif %}>3</option>
+                    <option value="4" {% if filters.studytime == '4' %}selected{% endif %}>4</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="sort">Sort</label>
+                <select class="form-select" id="sort" name="sort">
+                    <option value="">Student ID</option>
+                    <option value="-final_grade_pct" {% if filters.sort == '-final_grade_pct' %}selected{% endif %}>Final Grade High-Low</option>
+                    <option value="final_grade_pct" {% if filters.sort == 'final_grade_pct' %}selected{% endif %}>Final Grade Low-High</option>
+                    <option value="-attendance_pct" {% if filters.sort == '-attendance_pct' %}selected{% endif %}>Attendance High-Low</option>
+                    <option value="attendance_pct" {% if filters.sort == 'attendance_pct' %}selected{% endif %}>Attendance Low-High</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="attendance_min">Min Attendance %</label>
+                <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    id="attendance_min"
+                    name="attendance_min"
+                    value="{{ filters.attendance_min }}"
+                >
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="attendance_max">Max Attendance %</label>
+                <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    id="attendance_max"
+                    name="attendance_max"
+                    value="{{ filters.attendance_max }}"
+                >
+            </div>
+
+            <div class="col-md-8 d-flex justify-content-md-end gap-2">
+                <a class="btn btn-outline-secondary" href="{% url 'students:student_list' %}">Reset</a>
+                <button class="btn btn-primary" type="submit">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<p class="text-muted small mb-3">
+    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} records.
+</p>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th scope="col">Student ID</th>
+                        <th scope="col">School</th>
+                        <th scope="col">Sex</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Final Grade %</th>
+                        <th scope="col">Attendance %</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td>{{ student.student_id }}</td>
+                            <td>{{ student.school }}</td>
+                            <td>{{ student.sex }}</td>
+                            <td>{{ student.age }}</td>
+                            <td>{{ student.subject }}</td>
+                            <td>{{ student.final_grade_pct|floatformat:1 }}</td>
+                            <td>{{ student.attendance_pct|floatformat:1 }}</td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Student actions">
+                                    <a class="btn btn-outline-primary" href="{% url 'students:student_detail' student.pk %}">View</a>
+                                    <a class="btn btn-outline-secondary" href="{% url 'students:student_update' student.pk %}">Edit</a>
+                                    <a class="btn btn-outline-danger" href="{% url 'students:student_delete' student.pk %}">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">No student records found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if is_paginated %}
+    <nav class="mt-4" aria-label="Student pagination">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}

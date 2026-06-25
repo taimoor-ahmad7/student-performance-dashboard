@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+>
+
+<div class="py-4">
+    <div class="mb-4">
+        <h1 class="display-5 fw-semibold mb-3">Student Performance Dashboard</h1>
+        <p class="lead text-muted mb-0">
+            Search, manage, compare, visualize, and export student academic performance data from one Django web app.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-xl-3">
+            <a class="card shadow-sm h-100 text-decoration-none text-dark" href="/students/">
+                <div class="card-body">
+                    <div class="fs-2 text-primary mb-3">
+                        <i class="bi bi-people-fill" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="h5">Students</h2>
+                    <p class="text-muted mb-0">Browse and manage student records</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <a class="card shadow-sm h-100 text-decoration-none text-dark" href="/dashboard/">
+                <div class="card-body">
+                    <div class="fs-2 text-success mb-3">
+                        <i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="h5">Dashboard</h2>
+                    <p class="text-muted mb-0">View charts and analytics</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <a class="card shadow-sm h-100 text-decoration-none text-dark" href="/students/compare/">
+                <div class="card-body">
+                    <div class="fs-2 text-warning mb-3">
+                        <i class="bi bi-columns-gap" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="h5">Compare</h2>
+                    <p class="text-muted mb-0">Compare students side by side</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <a class="card shadow-sm h-100 text-decoration-none text-dark" href="/reports/">
+                <div class="card-body">
+                    <div class="fs-2 text-danger mb-3">
+                        <i class="bi bi-file-earmark-arrow-down-fill" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="h5">Reports</h2>
+                    <p class="text-muted mb-0">Export data as CSV or PDF</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

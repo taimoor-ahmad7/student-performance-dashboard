@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 mb-1">Reports</h1>
+    <p class="text-muted mb-0">Filter student records and download the result as CSV or PDF.</p>
+</div>
+
+<form method="get" class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" for="q">Search</label>
+                <input
+                    class="form-control"
+                    type="search"
+                    id="q"
+                    name="q"
+                    value="{{ filters.q }}"
+                    placeholder="Student ID, school, subject, guardian"
+                >
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="sex">Sex</label>
+                <select class="form-select" id="sex" name="sex">
+                    <option value="">All</option>
+                    <option value="F" {% if filters.sex == 'F' %}selected{% endif %}>Female</option>
+                    <option value="M" {% if filters.sex == 'M' %}selected{% endif %}>Male</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="subject">Subject</label>
+                <select class="form-select" id="subject" name="subject">
+                    <option value="">All</option>
+                    <option value="Math" {% if filters.subject == 'Math' %}selected{% endif %}>Math</option>
+                    <option value="Portuguese" {% if filters.subject == 'Portuguese' %}selected{% endif %}>Portuguese</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="studytime">Study Time</label>
+                <select class="form-select" id="studytime" name="studytime">
+                    <option value="">All</option>
+                    <option value="1" {% if filters.studytime == '1' %}selected{% endif %}>1</option>
+                    <option value="2" {% if filters.studytime == '2' %}selected{% endif %}>2</option>
+                    <option value="3" {% if filters.studytime == '3' %}selected{% endif %}>3</option>
+                    <option value="4" {% if filters.studytime == '4' %}selected{% endif %}>4</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="attendance_min">Min Attendance %</label>
+                <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    id="attendance_min"
+                    name="attendance_min"
+                    value="{{ filters.attendance_min }}"
+                >
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" for="attendance_max">Max Attendance %</label>
+                <input
+                    class="form-control"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    id="attendance_max"
+                    name="attendance_max"
+                    value="{{ filters.attendance_max }}"
+                >
+            </div>
+
+            <div class="col-md-10 d-flex justify-content-md-end gap-2">
+                <a class="btn btn-outline-secondary" href="{% url 'reports:reports_home' %}">Reset</a>
+                <button class="btn btn-outline-primary" type="submit" formaction="{% url 'reports:export_students_csv' %}">
+                    Download CSV
+                </button>
+                <button class="btn btn-primary" type="submit" formaction="{% url 'reports:export_students_pdf' %}">
+                    Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

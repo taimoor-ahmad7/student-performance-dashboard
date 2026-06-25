@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Compare Students | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Compare Students</h1>
+        <p class="text-muted mb-0">Select 2-4 students and compare their academic indicators side by side.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'students:student_list' %}">Back to Students</a>
+</div>
+
+<form id="compareForm" method="get" class="card shadow-sm mb-4">
+    <input type="hidden" id="idsInput" name="ids" value="">
+
+    <div class="card-body">
+        <div class="row g-3 align-items-end mb-3">
+            <div class="col-md-8">
+                <label class="form-label" for="student_search">Search Students</label>
+                <input
+                    class="form-control"
+                    type="search"
+                    id="student_search"
+                    name="student_search"
+                    value="{{ student_search }}"
+                    placeholder="Search by student ID or school"
+                >
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button class="btn btn-outline-primary" type="submit" data-action="search">Search</button>
+                <a class="btn btn-outline-secondary" href="{% url 'students:student_compare' %}">Reset</a>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-2">
+            {% for student in candidate_students %}
+                <div class="col">
+                    <div class="form-check border rounded p-3 ps-5 bg-white h-100">
+                        <input
+                            class="form-check-input student-checkbox"
+                            type="checkbox"
+                            value="{{ student.student_id }}"
+                            id="student_{{ student.student_id }}"
+                            {% if student.student_id in selected_student_ids %}checked{% endif %}
+                        >
+                        <label class="form-check-label" for="student_{{ student.student_id }}">
+                            <strong>{{ student.student_id }}</strong>
+                            <span class="text-muted d-block">{{ student.school }} - {{ student.subject }}</span>
+                            <span class="small d-block">Grade {{ student.final_grade_pct|floatformat:1 }}%, Attendance {{ student.attendance_pct|floatformat:1 }}%</span>
+                        </label>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col">
+                    <p class="text-muted mb-0">No students matched your search.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card-footer bg-white d-flex justify-content-end">
+        <button class="btn btn-primary" type="submit" data-action="compare">Compare</button>
+    </div>
+</form>
+
+{% if selected_students %}
+    {% if selected_students|length < 2 %}
+        <div class="alert alert-warning">Select at least 2 students to see a useful comparison.</div>
+    {% endif %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">Comparison Table</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col">Metric</th>
+                            {% for student in selected_students %}
+                                <th scope="col">Student {{ student.student_id }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in comparison_rows %}
+                            <tr>
+                                <th scope="row">{{ row.label }}</th>
+                                {% for cell in row.cells %}
+                                    <td class="{% if cell.is_best %}table-success{% elif cell.is_worst %}table-danger{% endif %}">
+                                        {{ cell.value }}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Final Grade and Attendance</div>
+        <div class="card-body">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info">Choose 2-4 students, then click Compare.</div>
+{% endif %}
+
+{{ chart_data|json_script:"comparison-chart-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const form = document.getElementById('compareForm');
+    const idsInput = document.getElementById('idsInput');
+
+    form.addEventListener('submit', (event) => {
+        const action = event.submitter.dataset.action;
+        const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked'))
+            .map((checkbox) => checkbox.value)
+            .slice(0, 4);
+
+        if (action === 'compare') {
+            event.preventDefault();
+
+            if (selectedIds.length < 2) {
+                alert('Please select at least 2 students to compare.');
+                return;
+            }
+
+            idsInput.value = selectedIds.join(',');
+            form.submit();
+            return;
+        }
+
+        idsInput.value = selectedIds.join(',');
+    });
+
+    const chartElement = document.getElementById('comparisonChart');
+
+    if (chartElement) {
+        const chartData = JSON.parse(document.getElementById('comparison-chart-data').textContent);
+
+        new Chart(chartElement, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: 'Final Grade %',
+                        data: chartData.final_grade_pct,
+                        backgroundColor: '#0d6efd'
+                    },
+                    {
+                        label: 'Attendance %',
+                        data: chartData.attendance_pct,
+                        backgroundColor: '#20c997'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

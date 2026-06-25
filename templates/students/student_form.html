@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Edit Student{% else %}Add Student{% endif %} | Student Performance Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">{% if object %}Edit Student {{ object.student_id }}{% else %}Add Student{% endif %}</h1>
+        <p class="text-muted mb-0">Enter values that match the student dataset columns.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'students:student_list' %}">Cancel</a>
+</div>
+
+<form method="post" class="card shadow-sm">
+    {% csrf_token %}
+    <div class="card-body">
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="row g-3">
+            {% for field in form %}
+                <div class="{% if field.field.widget.input_type == 'checkbox' %}col-md-3{% else %}col-md-4{% endif %}">
+                    {% if field.field.widget.input_type == 'checkbox' %}
+                        <div class="form-check mt-4">
+                            {{ field }}
+                            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        </div>
+                    {% else %}
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ field.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="card-footer bg-white d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'students:student_list' %}">Cancel</a>
+        <button class="btn btn-primary" type="submit">Save Student</button>
+    </div>
+</form>
+{% endblock %}

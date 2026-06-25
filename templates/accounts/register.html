@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Register | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">Create Account</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button class="btn btn-primary w-100" type="submit">Register</button>
+                </form>
+            </div>
+            <div class="card-footer bg-white text-center">
+                <span class="text-muted">Already have an account?</span>
+                <a href="{% url 'accounts:login' %}">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

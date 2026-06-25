@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Student | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-danger">
+    <div class="card-header bg-danger text-white fw-semibold">Delete Student Record</div>
+    <div class="card-body">
+        <p class="mb-1">Are you sure you want to delete this student record?</p>
+        <p class="text-muted mb-0">Student {{ student.student_id }} - {{ student.subject }}</p>
+    </div>
+    <div class="card-footer bg-white">
+        <form method="post" class="d-flex justify-content-end gap-2">
+            {% csrf_token %}
+            <a class="btn btn-outline-secondary" href="{% url 'students:student_detail' student.pk %}">Cancel</a>
+            <button class="btn btn-danger" type="submit">Delete Student</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

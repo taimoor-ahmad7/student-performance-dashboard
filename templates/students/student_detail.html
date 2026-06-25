@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Student {{ student.student_id }} | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Student {{ student.student_id }}</h1>
+        <p class="text-muted mb-0">{{ student.subject }} record from {{ student.school }}.</p>
+    </div>
+    <div class="btn-group">
+        <a class="btn btn-outline-secondary" href="{% url 'students:student_list' %}">Back</a>
+        <a class="btn btn-primary" href="{% url 'students:student_update' student.pk %}">Edit</a>
+        <a class="btn btn-outline-danger" href="{% url 'students:student_delete' student.pk %}">Delete</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">Academic Summary</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Subject</dt>
+                    <dd class="col-sm-7">{{ student.subject }}</dd>
+                    <dt class="col-sm-5">G1</dt>
+                    <dd class="col-sm-7">{{ student.G1 }} ({{ student.G1_pct|floatformat:1 }}%)</dd>
+                    <dt class="col-sm-5">G2</dt>
+                    <dd class="col-sm-7">{{ student.G2 }} ({{ student.G2_pct|floatformat:1 }}%)</dd>
+                    <dt class="col-sm-5">Final Grade</dt>
+                    <dd class="col-sm-7">{{ student.final_grade }} ({{ student.final_grade_pct|floatformat:1 }}%)</dd>
+                    <dt class="col-sm-5">Attendance</dt>
+                    <dd class="col-sm-7">{{ student.attendance_pct|floatformat:1 }}%</dd>
+                    <dt class="col-sm-5">Absences</dt>
+                    <dd class="col-sm-7">{{ student.absences }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">Student Context</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Sex</dt>
+                    <dd class="col-sm-7">{{ student.sex }}</dd>
+                    <dt class="col-sm-5">Age</dt>
+                    <dd class="col-sm-7">{{ student.age }}</dd>
+                    <dt class="col-sm-5">Address</dt>
+                    <dd class="col-sm-7">{{ student.address }}</dd>
+                    <dt class="col-sm-5">Family Size</dt>
+                    <dd class="col-sm-7">{{ student.famsize }}</dd>
+                    <dt class="col-sm-5">Guardian</dt>
+                    <dd class="col-sm-7">{{ student.guardian }}</dd>
+                    <dt class="col-sm-5">Study Time</dt>
+                    <dd class="col-sm-7">{{ student.studytime }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header fw-semibold">Support and Activities</div>
+    <div class="card-body">
+        <div class="row row-cols-1 row-cols-md-4 g-3">
+            <div><strong>School Support:</strong> {{ student.schoolsup|yesno:"Yes,No" }}</div>
+            <div><strong>Family Support:</strong> {{ student.famsup|yesno:"Yes,No" }}</div>
+            <div><strong>Paid Classes:</strong> {{ student.paid|yesno:"Yes,No" }}</div>
+            <div><strong>Activities:</strong> {{ student.activities|yesno:"Yes,No" }}</div>
+            <div><strong>Nursery:</strong> {{ student.nursery|yesno:"Yes,No" }}</div>
+            <div><strong>Higher Ed:</strong> {{ student.higher|yesno:"Yes,No" }}</div>
+            <div><strong>Internet:</strong> {{ student.internet|yesno:"Yes,No" }}</div>
+            <div><strong>Romantic:</strong> {{ student.romantic|yesno:"Yes,No" }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

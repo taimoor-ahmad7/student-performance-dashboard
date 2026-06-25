@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Student Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Academic overview based on the current student dataset.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Total Students</div>
+                <div class="display-6">{{ summary.total_students }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Average Final Grade</div>
+                <div class="display-6">{{ summary.average_final_grade|floatformat:1 }}%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Average Attendance</div>
+                <div class="display-6">{{ summary.average_attendance|floatformat:1 }}%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Top Student</div>
+                {% if summary.top_student %}
+                    <div class="h2 mb-0">{{ summary.top_student.student_id }}</div>
+                    <div class="text-muted small">{{ summary.top_student.final_grade_pct|floatformat:1 }}%</div>
+                {% else %}
+                    <div class="h2 mb-0">None</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Pass Rate</div>
+                <div class="display-6">{{ summary.pass_rate|floatformat:1 }}%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">Average Final Grade by Subject</div>
+            <div class="card-body"><canvas id="subjectBarChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">Gender Distribution</div>
+            <div class="card-body"><canvas id="genderPieChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">Average Final Grade by Study Time</div>
+            <div class="card-body"><canvas id="studytimeLineChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold">Final Grade Distribution</div>
+            <div class="card-body"><canvas id="gradeHistogramChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header fw-semibold">Attendance vs Final Grade</div>
+            <div class="card-body"><canvas id="attendanceScatterChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header fw-semibold">Automated Insights</div>
+    <div class="card-body">
+        <ul class="mb-0">
+            {% for insight in insights %}
+                <li class="mb-2">{{ insight }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function fetchChartData(url) {
+        const response = await fetch(url);
+        return response.json();
+    }
+
+    fetchChartData("{% url 'dashboard:average_grade_by_subject_json' %}").then((data) => {
+        new Chart(document.getElementById('subjectBarChart'), {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Average final grade %',
+                    data: data.values,
+                    backgroundColor: ['#0d6efd', '#20c997']
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+    });
+
+    fetchChartData("{% url 'dashboard:gender_distribution_json' %}").then((data) => {
+        new Chart(document.getElementById('genderPieChart'), {
+            type: 'pie',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values,
+                    backgroundColor: ['#dc3545', '#0dcaf0']
+                }]
+            }
+        });
+    });
+
+    fetchChartData("{% url 'dashboard:average_grade_by_studytime_json' %}").then((data) => {
+        new Chart(document.getElementById('studytimeLineChart'), {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Average final grade %',
+                    data: data.values,
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.15)',
+                    fill: true,
+                    tension: 0.25
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+    });
+
+    fetchChartData("{% url 'dashboard:final_grade_histogram_json' %}").then((data) => {
+        new Chart(document.getElementById('gradeHistogramChart'), {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Students',
+                    data: data.values,
+                    backgroundColor: '#ffc107'
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+    });
+
+    fetchChartData("{% url 'dashboard:attendance_grade_scatter_json' %}").then((data) => {
+        new Chart(document.getElementById('attendanceScatterChart'), {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Students',
+                    data: data.points,
+                    backgroundColor: '#6f42c1'
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Attendance %' }, min: 0, max: 100 },
+                    y: { title: { display: true, text: 'Final Grade %' }, min: 0, max: 100 }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
